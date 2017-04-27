@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
-
 import { StackNavigator } from 'react-navigation';
-import { colors, fontFamilies } from '../css';
+import IconAwesome from 'react-native-vector-icons/FontAwesome';
+import { colors } from '../css';
 import {
   TodoList,
   TaskDetail,
@@ -14,7 +14,6 @@ export default StackNavigator({
     screen: TodoList,
     navigationOptions: {
       headerLeft: <Text style={{color: '#bf5656', fontSize: 30, marginLeft: 10}}>Reminders</Text>,
-
     },
   },
   TaskDetail: {
@@ -28,28 +27,13 @@ export default StackNavigator({
   },
 }, {
   initialRouteName: 'TodoList',
-  cardStyle: {
-    // backgroundColor: colors.grey5,
-  },
   headerMode: 'screen',
 
-  navigationOptions: {
-    // header: (navigation) => ({
-  //     // ...navigationHeader,
-  //     style: {
-  //       backgroundColor: colors.yellowFictionlog,
-  //       height: 60,
-  //       elevation: 0,
-  //     },
-      // left: (
-      //   <TouchableOpacity onPress={() => navigation.goBack()}>
-      //     <Text style={{ fontSize: 30, color: 'white', marginLeft: 10}}>gdsgas</Text>
-      //   </TouchableOpacity>
-  //       <TouchableOpacity>
-  //         <Text style={{color: 'red'}}>Reminders</Text>
-  //       </TouchableOpacity>
-  //
-    //   ),
-    // }),
-  },
+  navigationOptions: ({navigation}) => ({
+    headerLeft: (
+      <TouchableOpacity onPress={() => navigation.goBack()} style={{paddingHorizontal: 10}}>
+        <IconAwesome name="chevron-left" size={20} color={colors.grey30} />
+      </TouchableOpacity>
+    ),
+  }),
 });
