@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   TouchableHighlight,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { connect } from 'react-redux';
-import CheckBox from 'react-native-check-box';
+import CheckBox from 'react-native-checkbox';
 import { todoListActions } from '../../redux/modules';
 import IconMaterial from 'react-native-vector-icons/MaterialCommunityIcons';
 import IconAwesome from 'react-native-vector-icons/FontAwesome';
@@ -26,20 +27,20 @@ import { colors } from '../../css';
 export default class Todolist extends Component {
   static propTypes = {
     todoList: PropTypes.object.isRequired,
-    finishTask: PropTypes.func.isRequired,
+    toggleFinishTask: PropTypes.func.isRequired,
     navigation: PropTypes.object.isRequired,
   };
   static navigationOptions = ({navigation }) => ({
     headerLeft: <Text style={{color: 'red', textAlign: 'left'}}>Reminders</Text>,
     headerRight: (
-      <TouchableOpacity onPress={() => navigation.navigate('TaskDetail', {taskTitle: 'New Task'})} style={{right: 5}}>
+      <TouchableOpacity onPress={() => navigation.navigate('TaskDetail', {taskTitle: 'New Task'})} style={{right: Platform.OS === 'ios' ? 5 : 0}}>
         <IconMaterial name="plus-circle-outline" size={25} color={colors.grey30} />
       </TouchableOpacity>
     ),
   });
 
   toggleFinishTask = (taskIndex, completed) => {
-    this.props.finishTask(taskIndex, !completed);
+    this.props.toggleFinishTask(taskIndex, !completed);
   }
 
   taskDetail = (taskIndex, taskTitle) => {
@@ -47,8 +48,6 @@ export default class Todolist extends Component {
   }
 
   completedTasks = () => {
-    console.log('completedTasks');
-
     this.props.navigation.navigate('CompletedTasks', {});
   }
 
@@ -57,6 +56,7 @@ export default class Todolist extends Component {
       <View style={styles.line} />
     );
   }
+
   render() {
     return (
       <View style={{flex: 1}}>
@@ -80,21 +80,23 @@ export default class Todolist extends Component {
 
           {this.props.todoList.allTasks.map((data, taskIndex) =>
             <View style={styles.eachCard} key={taskIndex}>
-              <View style={{width: 30, justifyContent: 'center'}}>
+              <View style={{width: 40, justifyContent: 'center'}}>
                 <CheckBox
-                  style={{marginLeft: 8}}
-                  onClick={() => this.toggleFinishTask(taskIndex, data.completed)}
-                  isChecked={data.completed}
+                  label=""
+                  containerStyle={{marginLeft: 7}}
+                  underlayColor={'transparent'}
+                  checked={data.completed}
+                  onChange={() => this.toggleFinishTask(taskIndex, data.completed)}
                 />
               </View>
-              <View style={{flex: 1, marginLeft: 14, justifyContent: 'center'}}>
+              <View style={{flex: 1, paddingLeft: 0, justifyContent: 'center'}}>
                 <TouchableHighlight onPress={() => this.taskDetail(taskIndex, data.title)} underlayColor={colors.grey20} style={{ paddingVertical: 10}}>
                   <View>
                     <Text style={[styles.title, {textDecorationLine: data.completed ? 'line-through' : 'none'}]}>
                       {data.title}
                     </Text>
                     <Text style={styles.time}>
-                      {moment(data.time).format('Do/MM/YYYY h:mm:ss')}
+                      {moment(data.time).format('DD/MM/YYYY h:mm:ss')}
                     </Text>
                   </View>
                 </TouchableHighlight>

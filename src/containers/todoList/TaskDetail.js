@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,10 +7,15 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
+import CheckBox from 'react-native-checkbox';
 import { connect } from 'react-redux';
 import { todoListActions } from '../../redux/modules';
-import { colors, fontFamilies, sizes } from '../../css';
+import { colors } from '../../css';
+import IconAwesome from 'react-native-vector-icons/FontAwesome';
 
 @connect(
   state => ({
@@ -23,90 +28,110 @@ export default class Todolist extends Component {
   static navigationOptions = ({navigation}) => ({
     title: `${navigation.state.params.taskTitle}`,
   });
-  // static navigationOptions = ({navigation }) => ({
-  //   headerRight: <TouchableOpacity onPress={() => this.createNewTask()}><Text style={{color: 'red', textAlign: 'left'}}>Save</Text></TouchableOpacity>,
-  //
-  // });
-  CheckBox = () => {
 
-  }
-
-  openCreateTask = () => {
-    this.state.list.push(1);
-    this.setState({list: this.state.list});
-  }
-
-  createNewTask = () => {
-    this.props.createNewTask(this.state.title, this.state.content);
-    this.props.navigation.goBack();
-  }
-
-  finishTask = () => {
-
-  }
+  static propTypes = {
+    todoList: PropTypes.object.isRequired,
+    updateTask: PropTypes.func.isRequired,
+    createNewTask: PropTypes.func.isRequired,
+    removeTask: PropTypes.func.isRequired,
+    toggleFinishTask: PropTypes.func.isRequired,
+    navigation: PropTypes.object.isRequired,
+  };
 
   constructor(props) {
     super(props);
     const taskIndex = props.navigation.state.params.taskIndex;
     this.state = {
-      title: taskIndex ? props.todoList.allTasks[taskIndex].title : '',
-      content: taskIndex ? props.todoList.allTasks[taskIndex].content : '',
+      taskIndex,
+      title: taskIndex !== undefined ? props.todoList.allTasks[taskIndex].title : '',
+      content: taskIndex !== undefined ? props.todoList.allTasks[taskIndex].content : '',
+      completed: taskIndex !== undefined ? props.todoList.allTasks[taskIndex].completed : false,
+    };
+  }
+
+  createNewTask = () => {
+    const {taskIndex, title, content} = this.state;
+    if (title === '') {
+      Alert.alert('Error', 'Title must not empty');
+    } else {
+      if (taskIndex) {
+        this.props.updateTask(taskIndex, title, content);
+      } else {
+        this.props.createNewTask(title, content);
+      }
+      this.props.navigation.goBack();
     }
   }
-  renderHeader() {
-    return (
-      <View style={{paddingTop: 20, flexDirection: 'row', justifyContent: 'space-between'}}>
-        <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-          <Text> Back </Text>
 
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text> Task </Text>
+  toggleFinishTask = (taskIndex, completed) => {
+    this.props.toggleFinishTask(taskIndex, !completed);
+    this.setState({completed: !completed});
+  }
 
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.createNewTask}>
-          <Text> Save </Text>
-
-        </TouchableOpacity>
-
-      </View>
+  removeTask = () => {
+    Alert.alert(
+      'Are you sure to remove this task?',
+      'this will remove the task forever',
+      [
+        {text: 'Cancel', onPress: () => {}},
+        {text: 'OK',
+          onPress: () => {
+            this.props.navigation.goBack();
+            this.props.removeTask(this.state.taskIndex);
+          },
+        },
+      ],
     );
   }
+
   render() {
+    console.log(this.state.taskIndex);
+    console.log(this.state);
     return (
       <View style={{flex: 1}}>
-        {/* {this.renderHeader()} */}
         <ScrollView style={styles.container}>
-          <Text>Title:</Text>
-          <TextInput
-            style={{height: 40, borderColor: 'gray', borderWidth: 1}}
-            onChangeText={(title) => this.setState({title})}
-            value={this.state.title}
-          />
-          <Text>Content:</Text>
-          <View style={{ backgroundColor: 'red'}}>
-            <TextInput
-              style={{height: Dimensions.get('window').height, borderColor: 'gray'}}
-              multiline={true}
-              onChangeText={(content) => this.setState({content})}
-              value={this.state.content}
-            />
-          </View>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View>
+              <Text style={{paddingVertical: 10}}>Title:</Text>
+              <TextInput
+                style={{height: 40, borderColor: colors.grey30, borderWidth: 1}}
+                autoCapitalize="none"
+                autoCorrect={true}
+                underlineColorAndroid="transparent"
+                onChangeText={(title) => this.setState({title})}
+                value={this.state.title}
+              />
 
+              <Text style={{paddingVertical: 10}}>Content:</Text>
 
+              <TextInput
+                style={{height: Dimensions.get('window').height, borderColor: colors.grey30, borderWidth: 1, textAlignVertical: 'top'}}
+                multiline={true}
+                autoCapitalize="none"
+                autoCorrect={true}
+                underlineColorAndroid="transparent"
+                onChangeText={(content) => this.setState({content})}
+                value={this.state.content}
+              />
+            </View>
+          </TouchableWithoutFeedback>
         </ScrollView>
-        <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity onPress={this.createNewTask} style={{borderWidth: 2}}>
-            <Text> Save </Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 5, borderTopWidth: 1, borderColor: colors.grey30}}>
+          <TouchableOpacity onPress={this.createNewTask} style={{justifyContent: 'center'}}>
+            <Text style={{color: colors.grey50}}>Save</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={this.createNewTask} style={{borderWidth: 2}}>
-            <Text> Remove </Text>
-
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.createNewTask} style={{borderWidth: 2}}>
-            <Text>set as completed</Text>
-
-          </TouchableOpacity>
+          {(this.state.taskIndex !== undefined) && <TouchableOpacity onPress={this.removeTask} style={{justifyContent: 'center'}}>
+            <CheckBox
+              label=""
+              containerStyle={{marginLeft: 7}}
+              underlayColor={'transparent'}
+              checked={this.state.completed}
+              onChange={() => this.toggleFinishTask(this.state.taskIndex, this.state.completed)}
+            />
+          </TouchableOpacity>}
+          {(this.state.taskIndex !== undefined) && <TouchableOpacity onPress={this.removeTask} style={{justifyContent: 'center'}}>
+            <IconAwesome name="trash-o" size={25} color={colors.grey40} />
+          </TouchableOpacity>}
         </View>
       </View>
 
@@ -117,18 +142,6 @@ export default class Todolist extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+    marginHorizontal: 10,
   },
 });

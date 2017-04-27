@@ -1,53 +1,73 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
-  StyleSheet,
+  AppState,
+  AsyncStorage,
+  StatusBar,
+  View,
   Text,
-  View
 } from 'react-native';
+import { persistStore } from 'redux-persist';
+import createCompressor from 'redux-persist-transform-compress';
+import { Provider } from 'react-redux';
+import store from './src/redux/store';
 
-export default class Todolist extends Component {
+import MainStack from './src/containers/MainStack';
+
+class App extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      appState: AppState.currentState,
+      rehydrated: false,
+    };
+  }
+
+  componentDidMount() {
+    const compressor = createCompressor();
+
+    persistStore(store, {
+      storage: AsyncStorage,
+      transforms: [compressor],
+      whitelist: ['todoList'],
+    }, () => {
+      this.setState({
+        rehydrated: true,
+      });
+    });
+
+    AppState.addEventListener('change', this._handleAppStateChange);
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
+
+  _handleAppStateChange = (nextAppState) => {
+    console.log(`AppState changed from ${this.state.appState} to ${nextAppState}`);
+
+    this.setState({ appState: nextAppState });
+  }
+
   render() {
+    if (!this.state.rehydrated) {
+      return (
+        <View style={{ flex: 1 }}>
+          <StatusBar barStyle="light-content" />
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text>My TodoList</Text>
+          </View>
+        </View>
+      );
+    }
+
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
-      </View>
+      <Provider store={store}>
+        <MainStack />
+      </Provider>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
-
-AppRegistry.registerComponent('Todolist', () => Todolist);
+AppRegistry.registerComponent('Todolist', () => App);
