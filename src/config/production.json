@@ -1,0 +1,5 @@
+{
+  // "apiBaseUrl": "https://api-staging.fictionlog.co/",
+  "apiBaseUrl": "https://api.fictionlog.co/",
+  "apiVersion": 0
+}
