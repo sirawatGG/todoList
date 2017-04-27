@@ -18,7 +18,8 @@
     "redux-logger": "^2.6.1",
     "redux-persist": "^4.4.2",
     "redux-persist-transform-compress": "^4.2.0",
-    "redux-promise": "^0.5.3"
+    "redux-promise": "^0.5.3",
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
