@@ -54,7 +54,7 @@ export default class Todolist extends Component {
     if (title === '') {
       Alert.alert('Error', 'Title must not empty');
     } else {
-      if (taskIndex) {
+      if (taskIndex !== undefined) {
         this.props.updateTask(taskIndex, title, content);
       } else {
         this.props.createNewTask(title, content);
@@ -85,8 +85,6 @@ export default class Todolist extends Component {
   }
 
   render() {
-    console.log(this.state.taskIndex);
-    console.log(this.state);
     return (
       <View style={{flex: 1}}>
         <ScrollView style={styles.container}>
