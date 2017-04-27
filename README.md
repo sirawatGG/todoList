@@ -15,3 +15,5 @@ Android
 1. turn on Android simulator
 2. react-native run-android
 
+Video Sample
+https://1drv.ms/v/s!AnVO-neGcStzgmMLdZaGLYOE-SEF
