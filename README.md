@@ -1,6 +1,6 @@
 # todoList
 
-This project use React-Native to develop.
+This project uses React-Native to develop.
 
 Installation
 1. npm install
